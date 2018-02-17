@@ -63,6 +63,7 @@ typedef enum BOOLEANOS {
 
 /*
  #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_SUAVECITO
+ #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_NIMADRES
  */
 #define CACA_COMUN_TIPO_ASSERT CACA_COMUN_ASSERT_DUROTE
 
@@ -72,7 +73,7 @@ typedef enum BOOLEANOS {
 #define assert_timeout(condition) assert(condition);
 #endif
 #if CACA_COMUN_TIPO_ASSERT == CACA_COMUN_ASSERT_SUAVECITO
-#define assert_timeout(condition) if(!(condition)){sleep(10);abort();}
+#define assert_timeout(condition) if(!(condition)){while(1){printf("");};abort();}
 #endif
 #if CACA_COMUN_TIPO_ASSERT == CACA_COMUN_ASSERT_NIMADRES
 #define assert_timeout(condition) 0
@@ -769,7 +770,7 @@ static inline void hash_map_robin_hood_back_shift_insertar_nuevo(
 #if 1
 
 //http://www.thelearningpoint.net/computer-science/data-structures-heaps-with-c-program-source-code
-#define HEAP_SHIT_MAX_NODOS (300001)
+#define HEAP_SHIT_MAX_NODOS (300002)
 #define HEAP_SHIT_MAX_LLAVES HUARONVERGA_MAX_LLAVE
 #define HEAP_SHIT_VALOR_INVALIDO ((entero_largo_sin_signo)(((entero_largo_sin_signo)CACA_COMUN_VALOR_INVALIDO)<<32 | CACA_COMUN_VALOR_INVALIDO))
 
@@ -882,6 +883,7 @@ static inline void heap_shit_insert(heap_shit *heap_ctx,
 			heap_ctx->obten_llave_fn(nodo_nuevo->valor), now);
 
 	heap_ctx->heap_size = heap_size;
+	assert_timeout(heap_size >= now);
 //	heap_shit_valida_nodos(heap_ctx);
 }
 
@@ -959,6 +961,7 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 			/* child is the index of the element which is minimum among both the children */
 			/* Indexes of children are i*2 and i*2 + 1*/
 			child = heap_shit_idx_hijo_izq(now);
+			assert_timeout(child <= heap_size);
 			/*child!=heap_size beacuse heap[heap_size+1] does not exist, which means it has only one
 			 child */
 			if (child != heap_size
@@ -972,6 +975,7 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 											heap[child].valor) > 0))) {
 				child++;
 			}
+			assert_timeout(child <= heap_size);
 			/* To check if the last element fits ot not it suffices to check if the last element
 			 is less than the minimum element among both the children*/
 			//printf("last %u heap %u\n",lastElement,heap[child]);
@@ -999,6 +1003,7 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 	caca_log_debug("borrada llave %d",
 			heap_ctx->obten_llave_fn( minElement.valor));
 	if (heap_size && idx_a_borrar != heap_size + 1) {
+		assert_timeout(now <= heap_size);
 		heap[now] = lastElement;
 		hash_map_robin_hood_back_shift_reemplazar(mapeo_inv,
 				heap_ctx->obten_llave_fn(lastElement.valor), now);
@@ -1294,7 +1299,7 @@ static inline bool submierda_encuentra_hay_ciclo_caca_dfs(submierda_nodo *nodo) 
 static inline bool submierda_encuentra_hay_ciclo_caca(submierda_nodo *nodos,
 		natural nodos_tam) {
 	bool hay_caca = falso;
-	for (int i = 0; i < nodos_tam; i++) {
+	for (int i = 1; i < nodos_tam + 1; i++) {
 		submierda_nodo *nodo_act = nodos + i;
 		if (nodo_act->color == no_visitado_submierda_estado_nodo) {
 			caca_log_debug("empezando dfs en %u", nodo_act->llave);
@@ -1409,7 +1414,7 @@ static inline int submierda_core(submierda_nodo *nodos, natural nodos_tam) {
 	return res;
 }
 
-submierda_nodo nodos[SUBMIERDA_MAX_NODOS + 1] = { 0 };
+submierda_nodo *nodos = NULL;
 char cadena[SUBMIERDA_MAX_NODOS + 1] = { '\0' };
 
 static inline void submierda_main() {
@@ -1417,6 +1422,8 @@ static inline void submierda_main() {
 	natural aristas_tam = 0;
 
 	scanf("%u %u\n", &nodos_tam, &aristas_tam);
+	nodos = calloc(SUBMIERDA_MAX_NODOS + 1, sizeof(submierda_nodo));
+	assert(nodos);
 
 	scanf("%s", cadena + 1);
 
@@ -1451,7 +1458,8 @@ static inline void submierda_main() {
 
 	int res = submierda_core(nodos, nodos_tam);
 	caca_log_debug("cca %d", res);
-	printf("%d",res);
+	printf("%d\n", res);
+	free(nodos);
 }
 
 int main(void) {
