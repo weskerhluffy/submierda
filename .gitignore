@@ -1,0 +1,9 @@
+
+*.swo
+shit*
+
+*.plist
+
+src/submierda.dSYM/Contents/Resources/DWARF/submierda
+
+src/submierda
