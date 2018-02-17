@@ -938,6 +938,7 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 								&& (heap_ctx->compara_prioridad_fn(
 										heap[heap_shit_idx_padre(now)].valor,
 										lastElement.valor) < 0)))) {
+			assert_timeout(now <= heap_size);
 			natural idx_padre = heap_shit_idx_padre(now);
 			entero_largo llave_padre = heap_ctx->obten_llave_fn(
 					heap[idx_padre].valor);
@@ -1025,8 +1026,9 @@ static inline void *heap_shit_borrar_directo(heap_shit *heap_ctx,
 
 	natural idx_hm = hash_map_robin_hood_back_shift_obten(indices_valores,
 			llave, &idx_a_borrar);
-	caca_log_debug("borrando llave %d en idx %u en idx hm %u", llave,
-			idx_a_borrar, idx_hm);
+	assert_timeout(idx_a_borrar <= heap_size);
+	caca_log_debug("borrando llave %d en idx %u en idx hm %u con heap size",
+			llave, idx_a_borrar, idx_hm, heap_size);
 	assert_timeout(idx_hm!=HASH_MAP_VALOR_INVALIDO);
 	assert_timeout(idx_a_borrar != HEAP_SHIT_VALOR_INVALIDO);
 
