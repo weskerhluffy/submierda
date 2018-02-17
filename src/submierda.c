@@ -938,7 +938,7 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 								&& (heap_ctx->compara_prioridad_fn(
 										heap[heap_shit_idx_padre(now)].valor,
 										lastElement.valor) < 0)))) {
-			assert_timeout(now <= heap_size);
+			assert_timeout(now <= heap_size + 1);
 			natural idx_padre = heap_shit_idx_padre(now);
 			entero_largo llave_padre = heap_ctx->obten_llave_fn(
 					heap[idx_padre].valor);
