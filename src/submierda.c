@@ -749,6 +749,11 @@ static inline void hash_map_robin_hood_back_shift_reemplazar(hm_rr_bs_tabla *ht,
 	entero_largo *valor_int = &(entero_largo ) { 0 };
 
 	iter = hash_map_robin_hood_back_shift_obten(ht, llave, valor_int);
+	if (llave == 99492) {
+		printf("llave %lu tiene orig valor %lu despues %lu\n", llave,
+				hash_map_robin_hood_back_shift_indice_obten_valor(ht, iter),
+				valor);
+	}
 
 	assert_timeout(iter!=HASH_MAP_VALOR_INVALIDO);
 
@@ -1027,7 +1032,7 @@ static inline void *heap_shit_borrar_directo(heap_shit *heap_ctx,
 	natural idx_hm = hash_map_robin_hood_back_shift_obten(indices_valores,
 			llave, &idx_a_borrar);
 	assert_timeout(idx_a_borrar <= heap_size);
-	caca_log_debug("borrando llave %d en idx %u en idx hm %u con heap size",
+	caca_log_debug("borrando llave %d en idx %u en idx hm %u con heap size %u",
 			llave, idx_a_borrar, idx_hm, heap_size);
 	assert_timeout(idx_hm!=HASH_MAP_VALOR_INVALIDO);
 	assert_timeout(idx_a_borrar != HEAP_SHIT_VALOR_INVALIDO);
