@@ -749,11 +749,13 @@ static inline void hash_map_robin_hood_back_shift_reemplazar(hm_rr_bs_tabla *ht,
 	entero_largo *valor_int = &(entero_largo ) { 0 };
 
 	iter = hash_map_robin_hood_back_shift_obten(ht, llave, valor_int);
+	/*
 	if (llave == 99492) {
-		printf("llave %lu tiene orig valor %lu despues %lu\n", llave,
-				hash_map_robin_hood_back_shift_indice_obten_valor(ht, iter),
+		printf("llave %lu tiene orig valor %lu despues %lu\n", llave, valor_int,
 				valor);
+		assert_timeout(valor != 99480);
 	}
+	*/
 
 	assert_timeout(iter!=HASH_MAP_VALOR_INVALIDO);
 
@@ -924,17 +926,8 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 	lastElement = heap[heap_size--];
 
 	now = idx_a_borrar;
-	if (heap_shit_nodo_valido(heap + heap_shit_idx_padre(now))
-			&& ((heap_ctx->min
-					&& heap_ctx->compara_prioridad_fn(
-							heap[heap_shit_idx_padre(now)].valor,
-							lastElement.valor) > 0)
-					|| (!heap_ctx->min
-							&& (heap_ctx->compara_prioridad_fn(
-									heap[heap_shit_idx_padre(now)].valor,
-									lastElement.valor))))) {
-
-		while (heap_shit_nodo_valido(heap + heap_shit_idx_padre(now))
+	if (idx_a_borrar != heap_size + 1) {
+		if (heap_shit_nodo_valido(heap + heap_shit_idx_padre(now))
 				&& ((heap_ctx->min
 						&& heap_ctx->compara_prioridad_fn(
 								heap[heap_shit_idx_padre(now)].valor,
@@ -942,64 +935,75 @@ static inline void *heap_shit_delete(heap_shit *heap_ctx, natural idx_a_borrar) 
 						|| (!heap_ctx->min
 								&& (heap_ctx->compara_prioridad_fn(
 										heap[heap_shit_idx_padre(now)].valor,
-										lastElement.valor) < 0)))) {
-			assert_timeout(now <= heap_size + 1);
-			natural idx_padre = heap_shit_idx_padre(now);
-			entero_largo llave_padre = heap_ctx->obten_llave_fn(
-					heap[idx_padre].valor);
+										lastElement.valor))))) {
 
-			assert_timeout(llave_padre != HEAP_SHIT_VALOR_INVALIDO);
-
-			heap[now] = heap[idx_padre];
-
-			hash_map_robin_hood_back_shift_reemplazar(mapeo_inv, llave_padre,
-					now);
-
-			caca_log_debug("llave %d tiene valor %u", llave_padre, now);
-
-			now = idx_padre;
-		}
-	} else {
-
-		/* now refers to the index at which we are now */
-		for (now = idx_a_borrar; heap_shit_idx_hijo_izq(now) <= heap_size; now =
-				child) {
-			/* child is the index of the element which is minimum among both the children */
-			/* Indexes of children are i*2 and i*2 + 1*/
-			child = heap_shit_idx_hijo_izq(now);
-			assert_timeout(child <= heap_size);
-			/*child!=heap_size beacuse heap[heap_size+1] does not exist, which means it has only one
-			 child */
-			if (child != heap_size
+			while (heap_shit_nodo_valido(heap + heap_shit_idx_padre(now))
 					&& ((heap_ctx->min
 							&& heap_ctx->compara_prioridad_fn(
-									heap[child + 1].valor, heap[child].valor)
-									< 0)
+									heap[heap_shit_idx_padre(now)].valor,
+									lastElement.valor) > 0)
 							|| (!heap_ctx->min
-									&& heap_ctx->compara_prioridad_fn(
-											heap[child + 1].valor,
-											heap[child].valor) > 0))) {
-				child++;
-			}
-			assert_timeout(child <= heap_size);
-			/* To check if the last element fits ot not it suffices to check if the last element
-			 is less than the minimum element among both the children*/
-			//printf("last %u heap %u\n",lastElement,heap[child]);
-			if ((heap_ctx->min
-					&& heap_ctx->compara_prioridad_fn(lastElement.valor,
-							heap[child].valor) > 0)
-					|| (!heap_ctx->min
-							&& heap_ctx->compara_prioridad_fn(lastElement.valor,
-									heap[child].valor))) {
-				heap[now] = heap[child];
+									&& (heap_ctx->compara_prioridad_fn(
+											heap[heap_shit_idx_padre(now)].valor,
+											lastElement.valor) < 0)))) {
+				assert_timeout(now <= heap_size);
+				natural idx_padre = heap_shit_idx_padre(now);
+				entero_largo llave_padre = heap_ctx->obten_llave_fn(
+						heap[idx_padre].valor);
+
+				assert_timeout(llave_padre != HEAP_SHIT_VALOR_INVALIDO);
+
+				heap[now] = heap[idx_padre];
 
 				hash_map_robin_hood_back_shift_reemplazar(mapeo_inv,
-						heap_ctx->obten_llave_fn(heap[child].valor), now);
-				caca_log_debug("llave %d tiene valor %u",
-						heap_ctx->obten_llave_fn(heap[child].valor), now);
-			} else /* It fits there */
-			{
-				break;
+						llave_padre, now);
+
+				caca_log_debug("llave %d tiene valor %u", llave_padre, now);
+
+				now = idx_padre;
+			}
+		} else {
+
+			/* now refers to the index at which we are now */
+			for (now = idx_a_borrar; heap_shit_idx_hijo_izq(now) <= heap_size;
+					now = child) {
+				/* child is the index of the element which is minimum among both the children */
+				/* Indexes of children are i*2 and i*2 + 1*/
+				child = heap_shit_idx_hijo_izq(now);
+				assert_timeout(child <= heap_size);
+				/*child!=heap_size beacuse heap[heap_size+1] does not exist, which means it has only one
+				 child */
+				if (child != heap_size
+						&& ((heap_ctx->min
+								&& heap_ctx->compara_prioridad_fn(
+										heap[child + 1].valor,
+										heap[child].valor) < 0)
+								|| (!heap_ctx->min
+										&& heap_ctx->compara_prioridad_fn(
+												heap[child + 1].valor,
+												heap[child].valor) > 0))) {
+					child++;
+				}
+				assert_timeout(child <= heap_size);
+				/* To check if the last element fits ot not it suffices to check if the last element
+				 is less than the minimum element among both the children*/
+				//printf("last %u heap %u\n",lastElement,heap[child]);
+				if ((heap_ctx->min
+						&& heap_ctx->compara_prioridad_fn(lastElement.valor,
+								heap[child].valor) > 0)
+						|| (!heap_ctx->min
+								&& heap_ctx->compara_prioridad_fn(
+										lastElement.valor, heap[child].valor))) {
+					heap[now] = heap[child];
+
+					hash_map_robin_hood_back_shift_reemplazar(mapeo_inv,
+							heap_ctx->obten_llave_fn(heap[child].valor), now);
+					caca_log_debug("llave %d tiene valor %u",
+							heap_ctx->obten_llave_fn(heap[child].valor), now);
+				} else /* It fits there */
+				{
+					break;
+				}
 			}
 		}
 	}
